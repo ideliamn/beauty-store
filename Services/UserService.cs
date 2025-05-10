@@ -16,7 +16,7 @@ namespace BeautyStore.Services
         }
         public async Task<ApiResponse<List<User>>> GetAllUsersAsync()
         {
-            var users = await _context.Users.ToListAsync();
+            var users = await _context.Users.AsNoTracking().ToListAsync();
             if (users.Count == 0)
             {
                 return ApiResponse<List<User>>.Error("No users found.");
@@ -26,7 +26,7 @@ namespace BeautyStore.Services
 
         public async Task<ApiResponse<User>> GetUserByIdAsync(int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
             if (user == null)
             {
                 return ApiResponse<User>.Error("User not found.");
@@ -36,13 +36,15 @@ namespace BeautyStore.Services
 
         public async Task<ApiResponse<User>> CreateUserAsync(CreateUserDto userDto)
         {
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password);
+            var passwordHash = BCrypt.Net.BCrypt.HashPassword(userDto.password);
 
             var user = new User
             {
-                Name = userDto.Name,
-                Email = userDto.Email,
-                Password = passwordHash
+                Name = userDto.name,
+                Email = userDto.email,
+                Password = passwordHash,
+                Phone = userDto.phone,
+                Address = userDto.address
             };
 
             _context.Users.Add(user);

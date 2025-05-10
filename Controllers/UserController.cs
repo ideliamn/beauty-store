@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace BeautyStore.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/users")]
     public class UserController : Controller
     {
         private readonly UserService _userService;
