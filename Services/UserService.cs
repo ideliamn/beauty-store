@@ -17,25 +17,6 @@ namespace BeautyStore.Services
             _context = context;
             _validator = validator;
         }
-        public async Task<ApiResponse<List<User>>> GetAllUsersAsync()
-        {
-            var users = await _context.Users.AsNoTracking().ToListAsync();
-            if (users.Count == 0)
-            {
-                return ApiResponse<List<User>>.Error("No users found.");
-            }
-            return ApiResponse<List<User>>.Success(users);
-        }
-
-        public async Task<ApiResponse<User>> GetUserByIdAsync(int id)
-        {
-            var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
-            if (user == null)
-            {
-                return ApiResponse<User>.Error("User not found.");
-            }
-            return ApiResponse<User>.Success(user);
-        }
 
         public async Task<ApiResponse<User>> CreateUserAsync(CreateUserDto dto)
         {
@@ -86,6 +67,26 @@ namespace BeautyStore.Services
             {
                 return ApiResponse<User>.Error("Failed to create user: " + ex.Message);
             }
+        }
+
+        public async Task<ApiResponse<User>> GetUserByIdAsync(int id)
+        {
+            var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
+            if (user == null)
+            {
+                return ApiResponse<User>.Error("User not found.");
+            }
+            return ApiResponse<User>.Success(user);
+        }
+
+        public async Task<ApiResponse<List<User>>> GetAllUsersAsync()
+        {
+            var users = await _context.Users.AsNoTracking().ToListAsync();
+            if (users.Count == 0)
+            {
+                return ApiResponse<List<User>>.Error("No users found.");
+            }
+            return ApiResponse<List<User>>.Success(users);
         }
 
         public async Task<ApiResponse<User>> UpdateUserAsync(UpdateUserDto dto)

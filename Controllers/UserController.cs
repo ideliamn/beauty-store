@@ -18,10 +18,15 @@ namespace BeautyStore.Controllers
             _userService = userService;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<ApiResponse<List<User>>>> GetAllUsers()
+        [HttpPost]
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserDto userDto)
         {
-            var response = await _userService.GetAllUsersAsync();
+            var response = await _userService.CreateUserAsync(userDto);
+            if (response.Code == 0)
+            {
+                return BadRequest(response);
+            }
+
             return Ok(response);
         }
 
@@ -37,15 +42,10 @@ namespace BeautyStore.Controllers
             return Ok(response);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody] CreateUserDto userDto)
+        [HttpGet]
+        public async Task<ActionResult<ApiResponse<List<User>>>> GetAllUsers()
         {
-            var response = await _userService.CreateUserAsync(userDto);
-            if (response.Code == 0)
-            {
-                return BadRequest(response);
-            }
-
+            var response = await _userService.GetAllUsersAsync();
             return Ok(response);
         }
 
