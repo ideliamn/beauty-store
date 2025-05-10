@@ -24,9 +24,11 @@ namespace BeautyStore.Models
         public DateTime? PaidAt { get; set; }
 
         [Column("created_at")]
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime CreatedAt { get; set; }
 
         [Column("updated_at")]
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime UpdatedAt { get; set; }
 
         public Order? Order { get; set; }

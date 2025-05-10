@@ -20,12 +20,14 @@ namespace BeautyStore.Models
         public string? Status { get; set; }
 
         [Column("created_at")]
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime CreatedAt { get; set; }
 
         [Column("updated_at")]
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime UpdatedAt { get; set; }
         public User? User { get; set; }
-        public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+        public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
         public Payment? Payment { get; set; }
     }
 

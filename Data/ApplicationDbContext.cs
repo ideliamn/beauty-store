@@ -15,7 +15,7 @@ namespace BeautyStore.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Order> Orders { get; set; }
-        public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<OrderDetail> OrderItems { get; set; }
         public DbSet<Payment> Payments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -68,12 +68,12 @@ namespace BeautyStore.Data
             });
 
             // OrderItem
-            modelBuilder.Entity<OrderItem>(entity =>
+            modelBuilder.Entity<OrderDetail>(entity =>
             {
                 entity.ToTable("order_items");
                 entity.HasKey(e => e.Id);
                 entity.HasOne(oi => oi.Order)
-                      .WithMany(o => o.OrderItems)
+                      .WithMany(o => o.OrderDetails)
                       .HasForeignKey(oi => oi.OrderId);
 
                 entity.HasOne(oi => oi.Product)

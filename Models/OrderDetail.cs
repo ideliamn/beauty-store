@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BeautyStore.Models
 {
-    public class OrderItem
+    public class OrderDetail
     {
         [Key]
         [Column("id")]
