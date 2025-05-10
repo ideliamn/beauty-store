@@ -12,7 +12,7 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        new MySqlServerVersion(new Version(8, 0, 36)) // versi sesuai DB kamu
+        new MySqlServerVersion(new Version(8, 0, 36))
     )
 );
 
@@ -29,7 +29,7 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/index.html", "BeautyStore API v1");
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "BeautyStore API v1");
     c.RoutePrefix = string.Empty;
 });
 
