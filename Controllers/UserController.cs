@@ -30,7 +30,9 @@ namespace BeautyStore.Controllers
         {
             var response = await _userService.GetUserByIdAsync(id);
             if (response.Code == 0)
+            {
                 return NotFound(response);
+            }
 
             return Ok(response);
         }
@@ -38,12 +40,34 @@ namespace BeautyStore.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserDto userDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<object>.Error("Invalid request."));
-
             var response = await _userService.CreateUserAsync(userDto);
             if (response.Code == 0)
+            {
                 return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDto userDto)
+        {
+            var response = await _userService.UpdateUserAsync(userDto);
+            if (response.Code == 0)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var response = await _userService.DeleteUserAsync(id);
+            if (response.Code == 0)
+            {
+                return BadRequest(response);
+            }
 
             return Ok(response);
         }

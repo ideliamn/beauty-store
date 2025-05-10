@@ -2,6 +2,7 @@
 using BeautyStore.DTOs;
 using BeautyStore.Models;
 using BeautyStore.Shared.Responses;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace BeautyStore.Services
@@ -9,10 +10,12 @@ namespace BeautyStore.Services
     public class UserService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IValidator<CreateUserDto> _validator;
 
-        public UserService(ApplicationDbContext context)
+        public UserService(ApplicationDbContext context, IValidator<CreateUserDto> validator)
         {
             _context = context;
+            _validator = validator;
         }
         public async Task<ApiResponse<List<User>>> GetAllUsersAsync()
         {
@@ -34,23 +37,135 @@ namespace BeautyStore.Services
             return ApiResponse<User>.Success(user);
         }
 
-        public async Task<ApiResponse<User>> CreateUserAsync(CreateUserDto userDto)
+        public async Task<ApiResponse<User>> CreateUserAsync(CreateUserDto dto)
         {
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(userDto.password);
-
-            var user = new User
+            try
             {
-                Name = userDto.name,
-                Email = userDto.email,
-                Password = passwordHash,
-                Phone = userDto.phone,
-                Address = userDto.address
-            };
+                var validationResult = await _validator.ValidateAsync(dto);
+                if (!validationResult.IsValid)
+                {
+                    var errors = validationResult.Errors
+                    .GroupBy(e => e.PropertyName)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.Select(e => e.ErrorMessage).ToList()
+                    );
+                    return ApiResponse<User>.Error("Validation failed.", errors);
+                }
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+                var checkEmailExist = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.email);
+                if (checkEmailExist != null)
+                {
+                    return ApiResponse<User>.Error("Email is already registered.");
+                }
 
-            return ApiResponse<User>.Success(user);
+                var checkPhoneExist = await _context.Users.FirstOrDefaultAsync(u => u.Phone == dto.phone);
+                if (checkPhoneExist != null)
+                {
+                    return ApiResponse<User>.Error("Phone is already registered.");
+                }
+
+                var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.password);
+
+                var user = new User
+                {
+                    Name = dto.name,
+                    Email = dto.email,
+                    Password = passwordHash,
+                    Phone = dto.phone,
+                    Address = dto.address
+                };
+
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+
+                return ApiResponse<User>.Success(user);
+
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<User>.Error("Failed to create user: " + ex.Message);
+            }
+        }
+
+        public async Task<ApiResponse<User>> UpdateUserAsync(UpdateUserDto dto)
+        {
+            try
+            {
+                if (dto.id == null)
+                {
+                    throw new Exception("ID cannot be empty.");
+                }
+                var user = await _context.Users.FindAsync(dto.id);
+
+                if (user == null)
+                {
+                    throw new Exception("User not found");
+                }
+
+                if (!string.IsNullOrWhiteSpace(dto.name))
+                {
+                    user.Name = dto.name;
+                }
+
+                if (!string.IsNullOrWhiteSpace(dto.email))
+                {
+                    user.Email = dto.email;
+                }
+
+                if (!string.IsNullOrWhiteSpace(dto.password))
+                {
+                    var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.password);
+                    user.Password = passwordHash;
+                }
+
+                if (!string.IsNullOrWhiteSpace(dto.phone))
+                {
+                    user.Phone = dto.phone;
+                }
+
+                if (!string.IsNullOrWhiteSpace(dto.address))
+                {
+                    user.Address = dto.address;
+                }
+
+                user.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                return ApiResponse<User>.Success(user);
+            }
+
+            catch (Exception ex) 
+            {
+                return ApiResponse<User>.Error("Failed to update user: " + ex.Message);
+            }
+
+        }
+
+        public async Task<ApiResponse<string>> DeleteUserAsync(int id)
+        {
+            try
+            {
+                if (id == null)
+                {
+                    throw new Exception("ID cannot be empty.");
+                }
+
+                var user = _context.Users.FindAsync(id);
+                if (user == null)
+                {
+                    throw new Exception("User not found");
+                }
+
+                await _context.Users.ExecuteDeleteAsync();
+
+                return ApiResponse<string>.Success("Success delete.");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<string>.Error("Failed to delete user: " + ex.Message);
+            }
         }
     }
 

@@ -31,9 +31,11 @@ namespace BeautyStore.Models
         public string? Address { get; set; }
 
         [Column("created_at")]
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime CreatedAt { get; set; }
 
         [Column("updated_at")]
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime UpdatedAt { get; set; }
 
         public ICollection<Order> Orders { get; set; } = new List<Order>();
