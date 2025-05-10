@@ -31,19 +31,19 @@ namespace BeautyStore.Services
                         g => g.Key,
                         g => g.Select(e => e.ErrorMessage).ToList()
                     );
-                    return ApiResponse<User>.Error("Validation failed.", errors);
+                    return ApiResponse<User>.Error(400, "Validation failed.", errors);
                 }
 
                 var checkEmailExist = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.email);
                 if (checkEmailExist != null)
                 {
-                    return ApiResponse<User>.Error("Email is already registered.");
+                    return ApiResponse<User>.Error(400, "Email is already registered.");
                 }
 
                 var checkPhoneExist = await _context.Users.FirstOrDefaultAsync(u => u.Phone == dto.phone);
                 if (checkPhoneExist != null)
                 {
-                    return ApiResponse<User>.Error("Phone is already registered.");
+                    return ApiResponse<User>.Error(400, "Phone is already registered.");
                 }
 
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.password);
@@ -60,12 +60,12 @@ namespace BeautyStore.Services
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
 
-                return ApiResponse<User>.Success(user);
+                return ApiResponse<User>.Success(200, user);
 
             }
             catch (Exception ex)
             {
-                return ApiResponse<User>.Error("Failed to create user: " + ex.Message);
+                return ApiResponse<User>.Error(500, "Failed to create user: " + ex.Message);
             }
         }
 
@@ -74,9 +74,9 @@ namespace BeautyStore.Services
             var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
             if (user == null)
             {
-                return ApiResponse<User>.Error("User not found.");
+                return ApiResponse<User>.Error(404, "User not found.");
             }
-            return ApiResponse<User>.Success(user);
+            return ApiResponse<User>.Success(200, user);
         }
 
         public async Task<ApiResponse<List<User>>> GetAllUsersAsync()
@@ -84,9 +84,9 @@ namespace BeautyStore.Services
             var users = await _context.Users.AsNoTracking().ToListAsync();
             if (users.Count == 0)
             {
-                return ApiResponse<List<User>>.Error("No users found.");
+                return ApiResponse<List<User>>.Error(400, "No users found.");
             }
-            return ApiResponse<List<User>>.Success(users);
+            return ApiResponse<List<User>>.Success(200, users);
         }
 
         public async Task<ApiResponse<User>> UpdateUserAsync(UpdateUserDto dto)
@@ -95,13 +95,13 @@ namespace BeautyStore.Services
             {
                 if (dto.id == null)
                 {
-                    throw new Exception("ID cannot be empty.");
+                    return ApiResponse<User>.Error(400, "ID cannot be empty.");
                 }
                 var user = await _context.Users.FindAsync(dto.id);
 
                 if (user == null)
                 {
-                    throw new Exception("User not found");
+                    return ApiResponse<User>.Error(404, "User not found.");
                 }
 
                 if (!string.IsNullOrWhiteSpace(dto.name))
@@ -134,12 +134,12 @@ namespace BeautyStore.Services
 
                 await _context.SaveChangesAsync();
 
-                return ApiResponse<User>.Success(user);
+                return ApiResponse<User>.Success(200, user);
             }
 
             catch (Exception ex) 
             {
-                return ApiResponse<User>.Error("Failed to update user: " + ex.Message);
+                return ApiResponse<User>.Error(500, "Failed to update user: " + ex.Message);
             }
 
         }
@@ -150,22 +150,22 @@ namespace BeautyStore.Services
             {
                 if (id == null)
                 {
-                    throw new Exception("ID cannot be empty.");
+                    return ApiResponse<string>.Error(400, "ID cannot be empty.");
                 }
 
                 var user = _context.Users.FindAsync(id);
                 if (user == null)
                 {
-                    throw new Exception("User not found");
+                    return ApiResponse<string>.Error(404, "User not found.");
                 }
 
                 await _context.Users.ExecuteDeleteAsync();
 
-                return ApiResponse<string>.Success("Success delete.");
+                return ApiResponse<string>.Success(200, "Success delete.");
             }
             catch (Exception ex)
             {
-                return ApiResponse<string>.Error("Failed to delete user: " + ex.Message);
+                return ApiResponse<string>.Error(500, "Failed to delete user: " + ex.Message);
             }
         }
     }
