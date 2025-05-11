@@ -14,8 +14,8 @@ namespace BeautyStore.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
-        public DbSet<Order> Orders { get; set; }
-        public DbSet<OrderDetail> OrderItems { get; set; }
+        public DbSet<Orders> Orders { get; set; }
+        public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<Payment> Payments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -48,7 +48,7 @@ namespace BeautyStore.Data
             });
 
             // Order
-            modelBuilder.Entity<Order>(entity =>
+            modelBuilder.Entity<Orders>(entity =>
             {
                 entity.ToTable("orders");
                 entity.HasKey(e => e.Id);
@@ -67,16 +67,15 @@ namespace BeautyStore.Data
                       .HasForeignKey<Payment>(p => p.OrderId);
             });
 
-            // OrderItem
+            // OrderDetail
             modelBuilder.Entity<OrderDetail>(entity =>
             {
-                entity.ToTable("order_items");
+                entity.ToTable("order_detail");
                 entity.HasKey(e => e.Id);
-                entity.HasOne(oi => oi.Order)
+                entity.HasOne<Orders>()
                       .WithMany(o => o.OrderDetails)
-                      .HasForeignKey(oi => oi.OrderId);
-
-                entity.HasOne(oi => oi.Product)
+                      .HasForeignKey(od => od.OrderId);
+                entity.HasOne(od => od.Product)
                       .WithMany(p => p.OrderItems)
                       .HasForeignKey(oi => oi.ProductId);
             });

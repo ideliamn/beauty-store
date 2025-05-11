@@ -2,7 +2,7 @@
 {
     public class CreateOrderDto
     {
-        public int user_id { get; set; }
-        public List<OrderDetailDto> order_detail { get; set; }
+        public string order_temp_id { get; set; }
+        public string payment_method { get; set; }
     }
 }

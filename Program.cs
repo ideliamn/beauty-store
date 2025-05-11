@@ -1,6 +1,7 @@
 using BeautyStore.Data;
 using BeautyStore.Services;
 using BeautyStore.Validators.Users;
+using BeautyStore.Shared.Checkers;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -24,6 +25,8 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<OrderTempService>();
+builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<DataExistChecker>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -33,7 +36,7 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateUserDtoValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductDtoValidator>();
-builder.Services.AddValidatorsFromAssemblyContaining<CreateOrderDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateOrderTempDtoValidator>();
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {

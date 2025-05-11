@@ -31,7 +31,7 @@ namespace BeautyStore.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime UpdatedAt { get; set; }
 
-        public Order? Order { get; set; }
+        public Orders? Order { get; set; }
     }
 
 }

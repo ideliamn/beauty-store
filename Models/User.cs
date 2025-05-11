@@ -38,6 +38,6 @@ namespace BeautyStore.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime UpdatedAt { get; set; }
 
-        public ICollection<Order> Orders { get; set; } = new List<Order>();
+        public ICollection<Orders> Orders { get; set; } = new List<Orders>();
     }
 }
