@@ -4,27 +4,29 @@ namespace BeautyStore.Services
 {
     public interface IRedisService
     {
-        Task SetStringAsync(string key, string value, TimeSpan? expiry = null);
-        Task<string?> GetStringAsync(string key);
+        Task SetStringAsync(string key, string value, int db = 0, TimeSpan? expiry = null);
+        Task<string?> GetStringAsync(string key, int db = 0);
     }
 
     public class RedisService : IRedisService
     {
-        private readonly IDatabase _db;
+        private readonly IConnectionMultiplexer _redis;
 
         public RedisService(IConnectionMultiplexer redis)
         {
-            _db = redis.GetDatabase();
+            _redis = redis;
         }
 
-        public async Task SetStringAsync(string key, string value, TimeSpan? expiry = null)
+        public async Task SetStringAsync(string key, string value, int db = 0, TimeSpan? expiry = null)
         {
-            await _db.StringSetAsync(key, value, expiry);
+            var redisDb = _redis.GetDatabase(db);
+            await redisDb.StringSetAsync(key, value, expiry);
         }
 
-        public async Task<string?> GetStringAsync(string key)
+        public async Task<string?> GetStringAsync(string key, int db = 0)
         {
-            return await _db.StringGetAsync(key);
+            var redisDb = _redis.GetDatabase(db);
+            return await redisDb.StringGetAsync(key);
         }
     }
 

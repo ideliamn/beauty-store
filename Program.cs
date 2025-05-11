@@ -19,6 +19,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     )
 );
 
+builder.Services.AddScoped<RedisService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ProductService>();
@@ -36,16 +37,10 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateOrderDtoValidator>();
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
-    var configuration = ConfigurationOptions.Parse("localhost:6379", true);
-    configuration.DefaultDatabase = 0;
-    return ConnectionMultiplexer.Connect(configuration);
+    var redisConnection = builder.Configuration.GetValue<string>("Redis:ConnectionString");
+    return ConnectionMultiplexer.Connect(redisConnection);
 });
-
-builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
-{
-    var configuration = builder.Configuration.GetValue<string>("Redis:ConnectionString");
-    return ConnectionMultiplexer.Connect(configuration);
-});
+builder.Services.AddSingleton<IRedisService, RedisService>();
 
 var app = builder.Build();
 

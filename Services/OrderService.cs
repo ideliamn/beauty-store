@@ -12,9 +12,9 @@ namespace BeautyStore.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IValidator<CreateOrderDto> _validator;
-        private readonly IConnectionMultiplexer _redis;
+        private readonly IRedisService _redis;
 
-        public OrderService(ApplicationDbContext context, IValidator<CreateOrderDto> validator, IConnectionMultiplexer redis)
+        public OrderService(ApplicationDbContext context, IValidator<CreateOrderDto> validator, IRedisService redis)
         {
             _context = context;
             _validator = validator;
@@ -43,14 +43,12 @@ namespace BeautyStore.Services
                 }
 
                 string dateTimeNow = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                string key = $"order:{dateTimeNow}:{dto.user_id}";
+                string key = $"order:{dto.user_id}:{dateTimeNow}";
                 string jsonOrder = JsonConvert.SerializeObject(dto);
 
                 // if not paid in 24 hours, delete from cache
                 TimeSpan expirationTime = TimeSpan.FromHours(24);
-
-                var db = _redis.GetDatabase();
-                await db.StringSetAsync(key, jsonOrder, expirationTime);
+                await _redis.SetStringAsync(key, jsonOrder, 0, expirationTime);
 
                 return ApiResponse<CreateOrderDto>.Success(200, dto, "Order created, please continue to payment.");
             }
