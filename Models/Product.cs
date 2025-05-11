@@ -42,7 +42,7 @@ namespace BeautyStore.Models
 
         public Category? Category { get; set; }
 
-        public ICollection<OrderDetail> OrderItems { get; set; } = new List<OrderDetail>();
+        public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
     }
 
 }

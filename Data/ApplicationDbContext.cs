@@ -76,7 +76,7 @@ namespace BeautyStore.Data
                       .WithMany(o => o.OrderDetails)
                       .HasForeignKey(od => od.OrderId);
                 entity.HasOne(od => od.Product)
-                      .WithMany(p => p.OrderItems)
+                      .WithMany(p => p.OrderDetails)
                       .HasForeignKey(oi => oi.ProductId);
             });
         }

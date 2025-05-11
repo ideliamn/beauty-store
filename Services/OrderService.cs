@@ -26,7 +26,7 @@ namespace BeautyStore.Services
             _orderTempService = orderTempService;
         }
 
-        public async Task<ApiResponse<Orders>> CreateOrderAsync(CreateOrderDto dto)
+        public async Task<ApiResponse<OrderResponseDto>> CreateOrderAsync(CreateOrderDto dto)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
 
@@ -41,15 +41,14 @@ namespace BeautyStore.Services
                         g => g.Key,
                         g => g.Select(e => e.ErrorMessage).ToList()
                     );
-                    return ApiResponse<Orders>.Error(400, "Validation failed.", errors);
+                    return ApiResponse<OrderResponseDto>.Error(400, "Validation failed.", errors);
                 }
 
                 // get data from temp
                 var tempData = await _orderTempService.GetOrderTempByIdAsync(dto.order_temp_id);
-                Debug.WriteLine("tempdata: " + JsonConvert.SerializeObject(tempData));
                 if (tempData.Code == 0)
                 {
-                    return ApiResponse<Orders>.Error(tempData.HttpStatus, tempData.Message);
+                    return ApiResponse<OrderResponseDto>.Error(tempData.HttpStatus, tempData.Message);
                 }
                 CreateOrderTempDto orderTemp = tempData.Data;
                 int userId = orderTemp.user_id;
@@ -59,14 +58,14 @@ namespace BeautyStore.Services
                 var checkUserExist = await _checker.CheckUserExistAsync(userId);
                 if (!checkUserExist)
                 {
-                    return ApiResponse<Orders>.Error(404, "User not found.");
+                    return ApiResponse<OrderResponseDto>.Error(404, "User not found.");
                 }
 
                 // check if product exist
                 var (orderDetails, totalPrice, message) = await CreateOrderDetailsAsync(orderTempDetail);
                 if (message != null || orderDetails == null)
                 {
-                    return ApiResponse<Orders>.Error(404, message);
+                    return ApiResponse<OrderResponseDto>.Error(404, message);
                 }
 
                 // insert order
@@ -88,17 +87,30 @@ namespace BeautyStore.Services
                 var deleteTempData = await _orderTempService.DeleteOrderTempAsync(dto.order_temp_id);
                 if (deleteTempData.Code == 0)
                 {
-                    return ApiResponse<Orders>.Error(tempData.HttpStatus, tempData.Message);
+                    return ApiResponse<OrderResponseDto>.Error(tempData.HttpStatus, tempData.Message);
                 }
 
+                // mapping response
+                var response = new OrderResponseDto
+                {
+                    id = order.Id,
+                    total_amount = order.TotalAmount,
+                    order_detail = order.OrderDetails.Select(od => new OrderDetailDto
+                    {
+                        product_id = od.ProductId,
+                        product_name = od.Product?.Name,
+                        quantity = od.Quantity
+                    }).ToList()
+                };
+
                 await transaction.CommitAsync();
-                return ApiResponse<Orders>.Success(200, order);
+                return ApiResponse<OrderResponseDto>.Success(200, response);
 
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                return ApiResponse<Orders>.Error(500, "Failed to create order: " + ex.Message);
+                return ApiResponse<OrderResponseDto>.Error(500, "Failed to create order: " + ex.Message);
             }
         }
 
@@ -109,19 +121,20 @@ namespace BeautyStore.Services
 
             foreach (var o in orderDetailTemp)
             {
-                var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == o.product_id);
-                if (product == null)
+                var checkProduct = await _checker.CheckProductValidAsync(o.product_id, o.quantity);
+                if (checkProduct == null)
                 {
-                    return (null, totalPrice, $"Product ID {o.product_id} not found.");
+                    return (null, 0, $"Product {o.product_id} invalid.");
                 }
 
                 orderDetails.Add(new OrderDetail
                 {
                     ProductId = o.product_id,
-                    Quantity = o.quantity
+                    Quantity = o.quantity,
+                    Price = (int)(checkProduct.Price * o.quantity),
                 });
 
-                totalPrice += ((int)product.Price * o.quantity);
+                totalPrice += (int)(checkProduct.Price * o.quantity);
             }
 
             return (orderDetails, totalPrice, null);
@@ -132,7 +145,8 @@ namespace BeautyStore.Services
             var order = new Orders
             {
                 UserId = userId,
-                TotalAmount = totalPrice
+                TotalAmount = totalPrice,
+                Status = "PAID"
             };
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();

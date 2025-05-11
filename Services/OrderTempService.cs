@@ -56,10 +56,10 @@ namespace BeautyStore.Services
 
                 foreach (var o in dto.order_detail)
                 {
-                    var checkProductExist = await _checker.CheckProductExistAsync(o.product_id);
+                    var checkProductExist = await _checker.CheckProductValidAsync(o.product_id, o.quantity);
                     if (checkProductExist == null)
                     {
-                        return ApiResponse<CreateOrderTempDto>.Error(404, $"Product {o.product_id} not found.");
+                        return ApiResponse<CreateOrderTempDto>.Error(404, $"Product {o.product_id} invalid");
                     }
                 }
 

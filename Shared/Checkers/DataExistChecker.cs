@@ -18,9 +18,11 @@ namespace BeautyStore.Shared.Checkers
             return await _context.Users.AnyAsync(u => u.Id == userId);
         }
 
-        public async Task<Product?> CheckProductExistAsync(int productId)
+        public async Task<Product?> CheckProductValidAsync(int productId, int quantity)
         {
-            return await _context.Products.FirstOrDefaultAsync(p => p.Id == productId);
+            var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == productId);
+            return product != null && product.Stock >= quantity ? product : null;
         }
+
     }
 }
