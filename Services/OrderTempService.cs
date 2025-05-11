@@ -9,14 +9,14 @@ using StackExchange.Redis;
 
 namespace BeautyStore.Services
 {
-    public class OrderService
+    public class OrderTempService
     {
         private readonly ApplicationDbContext _context;
         private readonly IValidator<CreateOrderDto> _validatorCreate;
         private readonly IValidator<UpdateOrderDto> _validatorUpdate;
         private readonly IRedisService _redis;
 
-        public OrderService(ApplicationDbContext context, IValidator<CreateOrderDto> validatorCreate, IValidator<UpdateOrderDto> validatorUpdate, IRedisService redis)
+        public OrderTempService(ApplicationDbContext context, IValidator<CreateOrderDto> validatorCreate, IValidator<UpdateOrderDto> validatorUpdate, IRedisService redis)
         {
             _context = context;
             _redis = redis;
@@ -91,7 +91,7 @@ namespace BeautyStore.Services
 
                 if (keyValuePairs == null || keyValuePairs.Count == 0)
                 {
-                    return ApiResponse<List<OrderTempDto>>.Error(404, "Order not found.");
+                    return ApiResponse<List<OrderTempDto>>.Error(404, "No order found.");
                 }
 
                 var result = new List<OrderTempDto>();

@@ -10,9 +10,9 @@ namespace BeautyStore.Controllers
     [Route("api/orders")]
     public class OrderController : Controller
     {
-        private readonly OrderService _orderService;
+        private readonly OrderTempService _orderService;
 
-        public OrderController(OrderService orderService)
+        public OrderController(OrderTempService orderService)
         {
             _orderService = orderService;
         }
