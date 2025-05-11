@@ -20,8 +20,35 @@ namespace BeautyStore.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto orderDto)
         {
-            var response = await _orderService.CreateOrderCacheAsync(orderDto);
+            var response = await _orderService.CreateOrderTempAsync(orderDto);
+            return StatusCode(response.HttpStatus, response);
+        }
 
+        [HttpGet("id/{id}")]
+        public async Task<ActionResult<ApiResponse<CreateOrderDto>>> GetOrderTempById(string id)
+        {
+            var response = await _orderService.GetOrderTempByIdAsync(id);
+            return StatusCode(response.HttpStatus, response);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<ApiResponse<List<KeyValuePair<string, string>>>>> GetOrderTempAsync(string user_id = "")
+        {
+            var response = await _orderService.GetOrderTempAsync(user_id);
+            return StatusCode(response.HttpStatus, response);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateOrder([FromBody] UpdateOrderDto orderDto)
+        {
+            var response = await _orderService.UpdateOrderTempAsync(orderDto);
+            return StatusCode(response.HttpStatus, response);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteOrder(string id)
+        {
+            var response = await _orderService.DeleteOrderTempAsync(id);
             return StatusCode(response.HttpStatus, response);
         }
 
