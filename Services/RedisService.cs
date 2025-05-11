@@ -45,7 +45,7 @@ namespace BeautyStore.Services
 
             var keys = string.IsNullOrEmpty(prefix) 
                 ? server.Keys(db) 
-                : server.Keys(db, $"{prefix}*");
+                : server.Keys(db, $"order:{prefix}*");
 
             var result = new List<KeyValuePair<string, string>>();
             foreach (var key in keys)

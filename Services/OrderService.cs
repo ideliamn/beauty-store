@@ -83,11 +83,11 @@ namespace BeautyStore.Services
             return ApiResponse<CreateOrderDto>.Success(200, dto);
         }
 
-        public async Task<ApiResponse<List<OrderTempDto>>> GetOrderTempAsync(string prefix = "")
+        public async Task<ApiResponse<List<OrderTempDto>>> GetOrderTempAsync(string user_id = "")
         {
             try
             {
-                var keyValuePairs = await _redis.GetKeyValueAsync(0, prefix);
+                var keyValuePairs = await _redis.GetKeyValueAsync(0, user_id);
 
                 if (keyValuePairs == null || keyValuePairs.Count == 0)
                 {
